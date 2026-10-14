@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LeftSidebar } from "@/components/left-sidebar";
 import { RightSidebar } from "@/components/right-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <MobileNav />
             <SiteFooter />
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
