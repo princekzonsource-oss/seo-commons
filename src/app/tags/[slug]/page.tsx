@@ -5,6 +5,7 @@ import { getPublishedPosts } from "@/lib/posts";
 import { prisma } from "@/lib/prisma";
 import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
+import { getCurrentDbUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function TagPage({
   const page = Number(sp?.page ?? "1") || 1;
   const tag = await prisma.tag.findUnique({ where: { slug } });
   if (!tag) notFound();
+  const currentUser = await getCurrentDbUser();
   const { posts, total, totalPages } = await getPublishedPosts({ page, tagSlug: slug });
 
   return (
@@ -45,7 +47,7 @@ export default async function TagPage({
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} currentUser={currentUser} />
           ))}
         </div>
       )}

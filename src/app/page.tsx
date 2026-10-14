@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getPublishedPosts } from "@/lib/posts";
 import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
+import { getCurrentDbUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function HomePage({
   const sort = (sp?.sort ?? "hot") as "hot" | "top" | "new" | "unanswered";
   const range = (sp?.range ?? "week") as "today" | "week" | "month" | "all";
   const type = sp?.type;
+  const currentUser = await getCurrentDbUser();
   const { posts, totalPages, total } = await getPublishedPosts({ page, sort, range, type });
 
   return (
@@ -72,7 +74,7 @@ export default async function HomePage({
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} currentUser={currentUser} />
           ))}
         </div>
       )}

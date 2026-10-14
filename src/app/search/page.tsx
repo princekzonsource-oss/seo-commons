@@ -4,6 +4,7 @@ import { getPublishedPosts } from "@/lib/posts";
 import { PostCard } from "@/components/post-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getCurrentDbUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ export default async function SearchPage({
   const sp = await searchParams;
   const q = sp?.q ?? "";
   const page = Number(sp?.page ?? "1") || 1;
+  const currentUser = await getCurrentDbUser();
   const { posts, total, totalPages } = q
     ? await getPublishedPosts({ page, search: q })
     : { posts: [], total: 0, totalPages: 0 };
@@ -47,7 +49,7 @@ export default async function SearchPage({
       {posts.length > 0 && (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} currentUser={currentUser} />
           ))}
         </div>
       )}

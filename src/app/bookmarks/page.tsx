@@ -39,7 +39,7 @@ export default async function BookmarksPage() {
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post as never} />
+            <PostCard key={post.id} post={post as never} currentUser={me} />
           ))}
         </div>
       )}

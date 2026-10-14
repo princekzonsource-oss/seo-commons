@@ -92,7 +92,7 @@ export default async function UserProfilePage({
       ) : (
         <div className="space-y-4">
           {user.posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} currentUser={me} />
           ))}
         </div>
       )}

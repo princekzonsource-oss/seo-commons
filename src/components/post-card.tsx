@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowBigDown, ArrowBigUp, Bookmark, FileText, HelpCircle, Link2, MessageCircle, MessageSquare } from "lucide-react";
 import { toggleBookmark, votePost } from "@/lib/mutators";
-import { getCurrentDbUser } from "@/lib/auth";
 import { getVoteScore } from "@/lib/posts";
 import { getTagColor } from "@/lib/tag-colors";
 import { ShareButton } from "@/components/share-button";
@@ -18,6 +17,10 @@ type PostWithRelations = Prisma.PostGetPayload<{
   };
 }>;
 
+type CurrentUser = {
+  id: string;
+} | null;
+
 const typeIcon: Record<string, typeof HelpCircle> = {
   QUESTION: HelpCircle,
   DISCUSSION: MessageCircle,
@@ -25,8 +28,8 @@ const typeIcon: Record<string, typeof HelpCircle> = {
   RESOURCE: Link2,
 };
 
-export async function PostCard({ post }: { post: PostWithRelations }) {
-  const me = await getCurrentDbUser();
+export async function PostCard({ post, currentUser }: { post: PostWithRelations; currentUser: CurrentUser }) {
+  const me = currentUser;
   const userVote = me ? (post.votes.find((v) => v.userId === me.id)?.value ?? 0) : 0;
   const score = getVoteScore(post.votes);
   const TypeIcon = typeIcon[post.type] ?? MessageCircle;
