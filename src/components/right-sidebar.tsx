@@ -30,12 +30,19 @@ export async function RightSidebar() {
     select: { username: true, name: true, avatarUrl: true, reputation: true },
   });
 
-  const [members, postsToday, activeToday, popularTags] = await Promise.all([
-    prisma.user.count(),
-    prisma.post.count({ where: { createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, deletedAt: null } }),
-    prisma.user.count({ where: { updatedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } }),
-    prisma.tag.findMany({ include: { _count: { select: { posts: true } } }, orderBy: { posts: { _count: "desc" } }, take: 8 }),
-  ]);
+  // Sequential queries to avoid connection pool exhaustion (connection_limit=1)
+  const members = await prisma.user.count();
+  const postsToday = await prisma.post.count({
+    where: { createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, deletedAt: null },
+  });
+  const activeToday = await prisma.user.count({
+    where: { updatedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+  });
+  const popularTags = await prisma.tag.findMany({
+    include: { _count: { select: { posts: true } } },
+    orderBy: { posts: { _count: "desc" } },
+    take: 8,
+  });
 
   return (
     <aside className="sticky top-20 space-y-4">

@@ -43,19 +43,18 @@ export async function getPublishedPosts(params: {
       ? { createdAt: "desc" as const }
       : { createdAt: "desc" as const };
 
-  const [posts] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      orderBy,
-      include: {
-        author: { select: { id: true, username: true, name: true, avatarUrl: true, reputation: true } },
-        tags: { select: { id: true, name: true, slug: true, color: true } },
-        votes: { select: { value: true, userId: true } },
-        _count: { select: { comments: true } },
-      },
-    }),
-    prisma.post.count({ where }),
-  ]);
+  // Sequential queries to avoid connection pool exhaustion (connection_limit=1)
+  const posts = await prisma.post.findMany({
+    where,
+    orderBy,
+    include: {
+      author: { select: { id: true, username: true, name: true, avatarUrl: true, reputation: true } },
+      tags: { select: { id: true, name: true, slug: true, color: true } },
+      votes: { select: { value: true, userId: true } },
+      _count: { select: { comments: true } },
+    },
+  });
+  const totalCount = await prisma.post.count({ where });
 
   let sorted = posts;
   if (sort === "top") {
@@ -70,7 +69,7 @@ export async function getPublishedPosts(params: {
 
   const skip = (page - 1) * perPage;
   const paged = sorted.slice(skip, skip + perPage);
-  return { posts: paged, total: sorted.length, page, perPage, totalPages: Math.ceil(sorted.length / perPage) };
+  return { posts: paged, total: totalCount, page, perPage, totalPages: Math.ceil(totalCount / perPage) };
 }
 
 export async function getPostBySlug(slug: string) {
