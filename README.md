@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SEO Commons
 
-## Getting Started
+An open community platform for SEO professionals — built with Next.js, Prisma, Clerk, and Supabase.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js 16** (App Router)
+- **TypeScript**
+- **Prisma** + **PostgreSQL** (Supabase)
+- **Clerk** Auth
+- **Tailwind CSS** + **shadcn/ui**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. `git clone https://github.com/princekzonsource-oss/seo-commons.git`
+2. `cd seo-commons`
+3. `npm install`
+4. Copy `.env.example` to `.env.local` and fill in values
+5. `npx prisma migrate dev`
+6. `npm run dev`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Posts, comments, voting, tags**
+- **User profiles and karma**
+- **Notifications, bookmarks, follows**
+- **Admin moderation**
+- **SEO**: SSR, ISR, JSON‑LD, sitemap, RSS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Community UI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Dark‑first design with smooth hover states
+- Reddit‑style vote column and card layout
+- Responsive 3‑column feed (Left/Right sidebars)
+- Real‑time updates via Server Actions
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy to production is via **Vercel** (connect the GitHub repo → auto‑deploy).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For Supabase, use separate production credentials and clear test data before launch.
+
+## Contributing
+
+Feel free to open issues or PRs. See `CONTRIBUTING.md` (optional) for guidelines.
+
+---
+
+Built with ❤️ by the SEO Commons team.
