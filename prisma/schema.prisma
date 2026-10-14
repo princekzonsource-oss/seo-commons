@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum PostType {
+  QUESTION
+  DISCUSSION
+  CASE_STUDY
+  RESOURCE
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum NotificationType {
+  COMMENT_ON_POST
+  REPLY_TO_COMMENT
+  POST_UPVOTE
+  COMMENT_UPVOTE
+  FOLLOW
+  ACCEPTED_ANSWER
+}
+
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String   @unique
+  username    String   @unique
+  email       String   @unique
+  name        String?
+  bio         String?
+  avatarUrl   String?
+  website     String?
+  role        Role     @default(USER)
+  reputation  Int      @default(0)
+  banned      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts        Post[]
+  comments     Comment[]
+  votes        Vote[]
+  bookmarks    Bookmark[]
+  reports      Report[] @relation("Reporter")
+  notifications Notification[]
+  followers    Follow[] @relation("Following")
+  following    Follow[] @relation("Follower")
+  auditLogs    AuditLog[]
+
+  @@index([username])
+  @@index([role])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String    @db.Text
+  excerpt     String?
+  coverImage  String?
+  published   Boolean   @default(true)
+  type        PostType  @default(DISCUSSION)
+  deletedAt   DateTime?
+  authorId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author       User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments     Comment[]
+  votes        Vote[]
+  tags         Tag[]
+  bookmarks    Bookmark[]
+  reports      Report[]
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([slug])
+  @@index([type])
+  @@index([deletedAt])
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  content     String    @db.Text
+  authorId    String
+  postId      String
+  parentId    String?
+  isAccepted  Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+  reports  Report[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([deletedAt])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  value     Int
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model Tag {
+  id          String @id @default(cuid())
+  name        String @unique
+  slug        String @unique
+  description String?
+  color       String?
+
+  posts Post[]
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  reporterId String
+  postId     String?
+  commentId  String?
+  reason     String
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  reporter User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  post     Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment  Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([postId])
+  @@index([commentId])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType
+  referenceId String
+  title       String
+  body        String?
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  targetType String
+  targetId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+}
